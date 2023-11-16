@@ -10,6 +10,7 @@ import com.entity.CartEntity;
 import com.model.Policy;
 import com.model.PolicyCartRequest;
 import com.model.PolicyCartResponse;
+import com.model.PolicyDeleteRequest;
 
 public interface CartService {
  public String addPolicyToCart(@ModelAttribute List<PolicyCartRequest> requestPolicy);
@@ -18,4 +19,6 @@ public interface CartService {
  public PolicyCartResponse getCartItems(@RequestBody Integer cartId);
  public String getPolicybyId();
  public CartEntity findByClientUsername(String clientUsername);
+ public String deleteCartByUsername(String clientUsername);
+ public String deleteCartById(@ModelAttribute PolicyDeleteRequest deleterequest);
 }

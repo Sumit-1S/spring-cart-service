@@ -8,4 +8,6 @@ import com.entity.CartEntity;
 @Repository
 public interface InsuranceRepo extends CrudRepository<CartEntity, Integer>{
 	CartEntity findByClientUsername(String clientUsername);
+
+	String deleteByClientUsername(String clientUsername);
 }

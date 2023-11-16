@@ -1,5 +1,6 @@
 package com.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import com.entity.CartEntity;
 
 import com.model.PolicyCartRequest;
 import com.model.PolicyCartResponse;
+import com.model.PolicyDeleteRequest;
 import com.repo.InsuranceRepo;
 
 @Service
@@ -28,11 +30,22 @@ public class CartServiceImpl implements CartService {
 
 	@Override
 	public String addPolicyToCart(@ModelAttribute List<PolicyCartRequest> requestPolicy) {
-
 		Double totalpremium = 0.0;
-		for (PolicyCartRequest p : requestPolicy) {
-			totalpremium += p.getPremium();
+		String policyIds = "";
+		CartEntity cart = insuranceRepo.findByClientUsername(requestPolicy.get(0).getClientUsername());
+		if(cart!=null) {
+			for(PolicyCartRequest req:requestPolicy) {
+				if(!Arrays.stream(cart.getPolicyId().split(",")).anyMatch(value->value==req.getPolicyId())) {
+					totalpremium+=req.getPremium();
+					policyIds=req.getPolicyId()+","+policyIds;
+				}				
+			}
+			cart.setPolicyId(policyIds+cart.getPolicyId());
+			cart.setTotalPremium(totalpremium+cart.getTotalPremium());
+			return updatePolicyToCart(cart);
 		}
+		
+		
 		// create cart entity
 		CartEntity cartEntity = null;
 		try {
@@ -77,9 +90,37 @@ public class CartServiceImpl implements CartService {
 		insuranceRepo.save(reqCartUpdateRequest);
 		return "Updated";
 	}
+	
 	@Override
 	public CartEntity findByClientUsername(String clientUsername) {
 		return insuranceRepo.findByClientUsername(clientUsername);
 	}
+	
+	@Override
+	public String deleteCartByUsername(String clientUsername) {
+		return insuranceRepo.deleteByClientUsername(clientUsername);
+		
+	}
+
+
+
+	@Override
+	public String deleteCartById(@ModelAttribute PolicyDeleteRequest deleterequest) {
+		// TODO Auto-generated method stub
+		System.out.println(deleterequest.getClientUsername());
+		CartEntity cart =insuranceRepo.findByClientUsername(deleterequest.getClientUsername());
+		String policyIdcart=cart.getPolicyId();
+		policyIdcart = Arrays.stream(policyIdcart.split(","))
+
+                .filter(s -> !s.equals(String.valueOf(deleterequest.getPolicyId())))
+
+                .collect(Collectors.joining(","));
+		cart.setPolicyId(policyIdcart);
+		cart.setTotalPremium(cart.getTotalPremium() - deleterequest.getPremium());
+		updatePolicyToCart(cart);
+		return "Deleted";
+	}
+	
+	
 
 }

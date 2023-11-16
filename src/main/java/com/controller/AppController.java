@@ -2,9 +2,13 @@ package com.controller;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,10 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.entity.CartEntity;
 import com.model.PolicyCartRequest;
 import com.model.PolicyCartResponse;
+import com.model.PolicyDeleteRequest;
 import com.service.CartService;
 
 @RestController
 @RequestMapping("/insuranceCart")
+@CrossOrigin("http://localhost:3002")
 public class AppController {
 
 	@Autowired
@@ -36,8 +42,9 @@ public class AppController {
 	}
 	
 	@GetMapping("/getCartByUsername/{clientUsername}")
-	public ResponseEntity<CartEntity> getCartByClient(@PathVariable String clientUsername) {
-		return new ResponseEntity<CartEntity>( service.findByClientUsername(clientUsername),HttpStatus.OK);
+	public CartEntity getCartByClient(@PathVariable String clientUsername) {
+		CartEntity cart = service.findByClientUsername(clientUsername);
+		return cart;
 	}
 
 	@GetMapping("/getTotalPremium/{cartId}")
@@ -49,4 +56,19 @@ public class AppController {
 	public String updatePolicy(@RequestBody CartEntity entity) {
 		return service.updatePolicyToCart(entity);
 	}
+	
+	@DeleteMapping("/deleteCart/{clientUsername}")
+	@Transactional
+	public String deleteCart(@PathVariable String clientUsername) {
+		return service.deleteCartByUsername(clientUsername);
+	}
+	
+	@PostMapping("/delete")
+	@Transactional
+	@CrossOrigin
+	public String deletebypolicyId(@RequestBody PolicyDeleteRequest deleterequest)
+	{
+		return service.deleteCartById(deleterequest);
+	}
+	
 }
