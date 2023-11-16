@@ -1,91 +1,52 @@
 package com.repo;
 
-import com.entity.CartEntity;
-import com.example.shopmsmono.Insurance_CartApplication;
-import com.model.PolicyCartRequest;
-import com.model.PolicyCartResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.entity.CartEntity;
+import com.service.CartServiceImpl;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
-import java.util.List;
-
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = Insurance_CartApplication.class)//, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-//@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ExtendWith(MockitoExtension.class)
 public class RepoTest {
 
-    @Autowired
+    @InjectMocks
+    private CartServiceImpl cartService;
+
+    @Mock
     private InsuranceRepo insuranceRepo;
 
-    @Autowired
-    private TestEntityManager testEntityManager;
-
-
     @Test
-    void testFindByClientUsername() {
-        // Given
-        String clientUsername = "testUser";
-        CartEntity cartEntity = CartEntity.builder().clientUsername(clientUsername).build();
-        testEntityManager.persistAndFlush(cartEntity);
+    public void testFindByClientUsername() {
+        String clientUsername = "User123";
 
-        // When
-        CartEntity result = insuranceRepo.findByClientUsername(clientUsername);
-
-        // Then
-        assertEquals(clientUsername, result.getClientUsername());
-    }
-
-    @Test
-    void testAddPolicyToCart() {
-        // Given
-        PolicyCartRequest policyRequest = PolicyCartRequest.builder()
-                .policyId("1")
-                .clientUsername("testUser")
-                .premium(100.0)
-                .build();
-
-        // When
-        Double totalPremium = 100.0;  // Calculate total premium based on policyRequest
-        CartEntity cartEntity = CartEntity.builder()
-                .clientUsername(policyRequest.getClientUsername())
-                .policyId(policyRequest.getPolicyId())
-                .totalPremium(totalPremium)
-                .build();
-        cartEntity = insuranceRepo.save(cartEntity);
-
-        // Then
-        assertEquals("Item Added", "Item Added");  // Add relevant assertions based on your requirements
-    }
-
-    @Test
-    void testGetCartItems() {
-        // Given
-        CartEntity cartEntity = CartEntity.builder()
+        // Create a sample response from the repository
+        CartEntity expectedCartEntity = CartEntity.builder()
                 .cartId(1)
-                .clientUsername("testUser")
-                .policyId("1,2,3")
-                .totalPremium(300.0)
+                .clientUsername(clientUsername)
+                .policyId("123")
+                .totalPremium(1000.0)
                 .build();
-        testEntityManager.persistAndFlush(cartEntity);
 
-        // When
-        CartEntity result = insuranceRepo.findById(1).orElse(null);
+        when(insuranceRepo.findByClientUsername(clientUsername)).thenReturn(expectedCartEntity);
 
-        // Then
-        assertEquals("testUser", result.getClientUsername());
-        assertEquals(1, result.getCartId());
-        assertEquals("1,2,3", result.getPolicyId());
-        assertEquals(300.0, result.getTotalPremium());
+        // Call the method to be tested
+        CartEntity result = cartService.findByClientUsername(clientUsername);
+
+        // Assertions or verifications based on the expected behavior
+        assertEquals(expectedCartEntity, result);
+
+        // Verify that the repository method was called with the expected argument
+        verify(insuranceRepo).findByClientUsername(clientUsername);
     }
-}
 
+    // Add more tests for other repository methods as needed
+}

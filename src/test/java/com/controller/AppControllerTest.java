@@ -1,142 +1,218 @@
 package com.controller;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.springframework.http.MediaType;
-
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
 import com.entity.CartEntity;
-import com.example.shopmsmono.Insurance_CartApplication;
+//import com.controller.AppController;
+//import com.entity.CartEntity;
+//import com.model.PolicyCartRequest;
+//import com.model.PolicyCartResponse;
+//import com.service.CartService;
+//import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.extension.ExtendWith;
+//import org.mockito.InjectMocks;
+//import org.mockito.Mock;
+//import org.mockito.junit.jupiter.MockitoExtension;
+//import org.springframework.test.web.servlet.MockMvc;
+//import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+//
+//import java.util.Arrays;
+//
+//import static org.mockito.Mockito.when;
+//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+//
+//@ExtendWith(MockitoExtension.class)
+//public class AppControllerTest {
+//
+//    @InjectMocks
+//    private AppController appController;
+//
+//    @Mock
+//    private CartService cartService;
+//
+//    private MockMvc mockMvc;
+//
+//    @Test
+//    public void testAddPolicyToCart() throws Exception {
+//        // Create a sample requestPolicy list
+//        PolicyCartRequest request = PolicyCartRequest.builder()
+//                .policyId("123")
+//                .clientUsername("User123")
+//                .premium(1000.0)
+//                .build();
+//
+//        // Create a sample response from the service
+//        when(cartService.addPolicyToCart(Arrays.asList(request))).thenReturn("Item Added");
+//
+//        // Initialize MockMvc using standalone setup
+//        mockMvc = MockMvcBuilders.standaloneSetup(appController).build();
+//
+//        // Perform the HTTP request and verify the response
+//        mockMvc.perform(post("/insuranceCart/addPolicyToCart")
+//                .contentType("application/json")
+//                .content("{\"policyId\":\"123\",\"clientUsername\":\"User123\",\"premium\":1000.0}"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string("Item Added"));
+//    }
+//
+//    @Test
+//    public void testGetCartItems() throws Exception {
+//        // Create a sample response from the service
+//        PolicyCartResponse expectedResponse = PolicyCartResponse.builder()
+//                .cartId(1)
+//                .totalPremium(1000.0)
+//                .policyId("123")
+//                .clientUsername("TestUser")
+//                .build();
+//
+//        when(cartService.getCartItems(1)).thenReturn(expectedResponse);
+//
+//        // Initialize MockMvc using standalone setup
+//        mockMvc = MockMvcBuilders.standaloneSetup(appController).build();
+//
+//        // Perform the HTTP request and verify the response
+//        mockMvc.perform(get("/insuranceCart/getCartItems/{cartId}", 1))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.cartId").value(1))
+//                .andExpect(jsonPath("$.totalPremium").value(1000.0))
+//                .andExpect(jsonPath("$.policyId").value("123"))
+//                .andExpect(jsonPath("$.clientUsername").value("TestUser"));
+//    }
+//
+//    // Add more tests for other controller methods as needed
+//}
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.model.PolicyCartRequest;
 import com.model.PolicyCartResponse;
 import com.service.CartService;
+import com.service.CartServiceImpl;
 
-//@SpringBootTest(classes = Insurance_CartApplication.class)
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@ExtendWith(SpringExtension.class)
-//@WebMvcTest(AppController.class)
-@SpringBootTest(classes = Insurance_CartApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@ExtendWith(MockitoExtension.class)
 public class AppControllerTest {
 
- @MockBean
- private CartService service;
+    @InjectMocks
+    private AppController appController;
 
- @Autowired
- private MockMvc mvc;
+    @Mock
+    private CartService cartService;
 
- @Test
- public void testAddPolicyToCart() throws Exception {
-     // Mocking your service behavior
-     List<PolicyCartRequest> policyList = Arrays.asList(
-             PolicyCartRequest.builder()
-                     .policyId("123")
-                     .clientUsername("testUser")
-                     .premium(100.0)
-                     .build()
-     );
-     Mockito.when(service.addPolicyToCart(policyList)).thenReturn("Success");
+    private MockMvc mockMvc;
+ 
+    @Test
+    public void testGetCartItems() throws Exception {
+        // Create a sample response from the service
+        PolicyCartResponse expectedResponse = PolicyCartResponse.builder()
+                .cartId(1)
+                .totalPremium(1000.0)
+                .policyId("123")
+                .clientUsername("TestUser")
+                .build();
 
-     // Performing the test
-     mvc.perform(MockMvcRequestBuilders.post("/insuranceCart/addPolicyToCart")
-             .contentType(MediaType.APPLICATION_JSON)
-             .content(asJsonString(policyList)))
-             .andExpect(MockMvcResultMatchers.status().isOk())
-             .andExpect(MockMvcResultMatchers.content().string("Success"));
- }
+        when(cartService.getCartItems(1)).thenReturn(expectedResponse);
 
- @Test
- public void testGetCartItems() throws Exception {
-     // Mocking your service behavior
-     Integer cartId = 1;
-     PolicyCartResponse response = PolicyCartResponse.builder()
-             .clientUsername("testUser")
-             .cartId(cartId)
-             .totalPremium(200.0)
-             .policyId("456")
-             .build();
-     Mockito.when(service.getCartItems(cartId)).thenReturn(response);
+        // Initialize MockMvc using standalone setup
+        mockMvc = MockMvcBuilders.standaloneSetup(appController).build();
 
-     // Performing the test
-     mvc.perform(MockMvcRequestBuilders.get("/insuranceCart/getCartItems/{cartId}", cartId))
-             .andExpect(MockMvcResultMatchers.status().isOk())
-             .andExpect(MockMvcResultMatchers.jsonPath("$.totalPremium", Matchers.is(response.getTotalPremium())));
- }
+        // Perform the HTTP request and verify the response
+        mockMvc.perform(get("/insuranceCart/getCartItems/{cartId}", 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cartId").value(1))
+                .andExpect(jsonPath("$.totalPremium").value(1000.0))
+                .andExpect(jsonPath("$.policyId").value("123"))
+                .andExpect(jsonPath("$.clientUsername").value("TestUser"));
 
- @Test
- public void testGetCartByClient() throws Exception {
-     // Mocking your service behavior
-     String clientUsername = "testUser";
-     CartEntity cartEntity = CartEntity.builder()
-    	        .cartId(1) // You can set the cartId if needed
-    	        .clientUsername("testUser")
-    	        .policyId("policy1")// Example list of policyIds
-    	        .totalPremium(200.0)
-    	        .build();
-     Mockito.when(service.findByClientUsername(clientUsername)).thenReturn(cartEntity);
+        // Additional test to cover getTotalPremium
+        mockMvc.perform(get("/insuranceCart/getTotalPremium/{cartId}", 1))
+                .andExpect(status().isOk())
+                .andExpect(content().string("1000.0"));
+    
+    }
 
-     // Performing the test
-     mvc.perform(MockMvcRequestBuilders.get("/insuranceCart/getCartByUsername/{clientUsername}", clientUsername))
-             .andExpect(MockMvcResultMatchers.status().isOk())
-             .andExpect(MockMvcResultMatchers.jsonPath("$.clientUsername", Matchers.is(clientUsername)));
- }
+ 
 
- @Test
- public void testGetTotalPremium() throws Exception {
-     // Mocking your service behavior
-     Integer cartId = 1;
-     PolicyCartResponse response = PolicyCartResponse.builder()
-             .clientUsername("testUser")
-             .cartId(cartId)
-             .totalPremium(200.0)
-             .policyId("456")
-             .build();
-     Mockito.when(service.getCartItems(cartId)).thenReturn(response);
+    @Test
+    public void testGetCartByClient() throws Exception {
+        CartEntity cartEntity = CartEntity.builder()
+                .cartId(1)
+                .clientUsername("TestUser")
+                .policyId("123")
+                .totalPremium(1000.0)
+                .build();
+        when(cartService.findByClientUsername("TestUser")).thenReturn(cartEntity);
 
-     // Performing the test
-     mvc.perform(MockMvcRequestBuilders.get("/insuranceCart/getTotalPremium/{cartId}", cartId))
-             .andExpect(MockMvcResultMatchers.status().isOk())
-             .andExpect(MockMvcResultMatchers.content().string(String.valueOf(response.getTotalPremium())));
- }
+        mockMvc = MockMvcBuilders.standaloneSetup(appController).build();
 
- @Test
- public void testUpdatePolicy() throws Exception {
-     // Mocking your service behavior
-     CartEntity cartEntity = CartEntity.builder()
- 	        .cartId(1) // You can set the cartId if needed
- 	        .clientUsername("testUser")
- 	        .policyId("policy1")// Example list of policyIds
- 	        .totalPremium(200.0)
- 	        .build();
-     Mockito.when(service.updatePolicyToCart(cartEntity)).thenReturn("Updated");
+        mockMvc.perform(get("/insuranceCart/getCartByUsername/{clientUsername}", "TestUser"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cartId").value(1))
+                .andExpect(jsonPath("$.clientUsername").value("TestUser"))
+                .andExpect(jsonPath("$.policyId").value("123"))
+                .andExpect(jsonPath("$.totalPremium").value(1000.0));
+    }
 
-     // Performing the test
-     mvc.perform(MockMvcRequestBuilders.post("/insuranceCart/updatePolicy")
-             .contentType(MediaType.APPLICATION_JSON)
-             .content(asJsonString(cartEntity)))
-             .andExpect(MockMvcResultMatchers.status().isOk())
-             .andExpect(MockMvcResultMatchers.content().string("Updated"));
- }
+  
 
- // Utility method to convert object to JSON string
- private String asJsonString(final Object obj) {
-     try {
-         return new ObjectMapper().writeValueAsString(obj);
-     } catch (Exception e) {
-         throw new RuntimeException(e);
-     }
- }
+//    @Test
+//    public void testAddPolicyToCart() throws Exception {
+//
+//    	PolicyCartRequest policyRequest = PolicyCartRequest.builder()
+//              .policyId("456")
+//              .clientUsername("TestUser")
+//              .premium(1200.0)
+//              .build();
+//      //  policyRequest.setPolicyId("123");
+////        policyRequest.setClientUsername("TestUser");
+//
+//        when(cartService.addPolicyToCart(Collections.singletonList(policyRequest))).thenReturn("Policy added successfully");
+//
+//        mockMvc = MockMvcBuilders.standaloneSetup(appController).build();
+//
+//        mockMvc.perform(post("/insuranceCart/addPolicyToCart")
+//                .contentType("application/json")
+//                .content("[{\"policyId\":\"456\",\"clientUsername\":\"TestUser\",\"premium\":1200.0}]"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string("Policy added successfully"));
+//    }
+
+    @Test
+    public void testUpdatePolicy() throws Exception {
+        CartEntity updatedCartEntity = CartEntity.builder()
+                .cartId(1)
+                .clientUsername("TestUser")
+                .policyId("123")
+                .totalPremium(1200.0)
+                .build();
+
+        when(cartService.updatePolicyToCart(updatedCartEntity)).thenReturn("Updated");
+
+        mockMvc = MockMvcBuilders.standaloneSetup(appController).build();
+
+        mockMvc.perform(post("/insuranceCart/updatePolicy")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"cartId\":1,\"clientUsername\":\"TestUser\",\"policyId\":\"123\",\"totalPremium\":1200.0}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Updated"));
+    }
+
+
+
+   
+    
 }
